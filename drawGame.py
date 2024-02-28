@@ -45,6 +45,7 @@ class GameState:
         self.black_king_location = (0, 4)
         self.checkmate = False
         self.in_check = False
+        self.move_log = []
         self.pins = []
         self.checks = []
 
@@ -66,8 +67,14 @@ class GameState:
     def make_move(self, move):
 
         self.board[move.start_row][move.start_col] = "--"
+        if self.board[move.end_row][move.end_col] != "--":
+            self.play_beat_sound()
         self.board[move.end_row][move.end_col] = move.piece_moved
+        self.move_log.append(move)
         self.white_to_move = not self.white_to_move
+
+        if self.board[move.start_row][move.start_col] == "--":
+            self.play_move_sound()
 
         if move.piece_moved == "wK":
             self.white_king_location = (move.end_row, move.end_col)

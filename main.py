@@ -14,7 +14,9 @@ counter = 0
 def load_pieces():
     pieces = ['wp', 'wR', 'wN', 'wB', 'wK', 'wQ', 'bp', 'bR', 'bN', 'bB', 'bK', 'bQ']
     for piece in pieces:
-        img[piece] = pygame.transform.scale(pygame.image.load("../Schach/img/" + piece + ".png"),(field_size, field_size))
+        img[piece] = pygame.transform.scale(pygame.image.load("../Schach/img/" + piece + ".png"),
+                                            (field_size, field_size))
+
 
 def main():
     pygame.init()
@@ -36,6 +38,7 @@ def run_game(clock, game_state, legal_moves, screen):
     player_clicks = []
     game_over = False
     move_made = False
+    animate = False
 
     while running:
         for event in pygame.event.get():
@@ -58,12 +61,17 @@ def run_game(clock, game_state, legal_moves, screen):
                             if move == legal_moves[i]:
                                 game_state.make_move(legal_moves[i])
                                 move_made = True
+                                animate = True
                                 selected_piece = ()
                                 player_clicks = []
+                                break
                         if not move_made:
                             player_clicks = [selected_piece]
+                            move_made = False
 
         if move_made:
+            if animate:
+                animate_move(game_state.move_log[-1], screen, game_state.board, clock)
             legal_moves = game_state.get_legal_moves()
             move_made = False
 
@@ -96,6 +104,7 @@ def draw_game(screen, game_state, legal_moves, selected_piece):
         else:
             draw_flash_king(screen, game_state.black_king_location)
 
+
 def draw_board(screen):
     global colors
     colors = [pygame.Color("white"), pygame.Color("gray")]
@@ -114,9 +123,11 @@ def draw_selected_piece(screen, selected_piece):
 def draw_legal_moves(screen, game_state, legal_moves, selected_piece):
     for move in legal_moves:
         if selected_piece == (move.start_row, move.start_col):
-            pygame.draw.rect(screen, pygame.Color("green"),(move.end_col * field_size, move.end_row * field_size, field_size, field_size), 3)
+            pygame.draw.rect(screen, pygame.Color("green"),
+                             (move.end_col * field_size, move.end_row * field_size, field_size, field_size), 3)
             if game_state.board[move.end_row][move.end_col] != "--":
-                pygame.draw.rect(screen, pygame.Color("red"),(move.end_col * field_size, move.end_row * field_size, field_size, field_size), 3)
+                pygame.draw.rect(screen, pygame.Color("red"),
+                                 (move.end_col * field_size, move.end_row * field_size, field_size, field_size), 3)
 
 
 def draw_piece(screen, board):
@@ -131,6 +142,27 @@ def draw_flash_king(screen, king_position):
     row, col = king_position
     flash_color = pygame.Color("red") if counter % 4 < 2 else pygame.Color("White")
     pygame.draw.rect(screen, flash_color, (col * field_size, row * field_size, field_size, field_size), 3)
+
+
+def animate_move(move, screen, board, clock):
+    global colors
+    d_row = move.end_row - move.start_row
+    d_col = move.end_col - move.start_col
+    frames_per_square = 3  # frames to move one square
+    frame_count = (abs(d_row) + abs(d_col)) * frames_per_square
+    for frame in range(frame_count + 1):
+        row, col = (move.start_row + d_row * frame / frame_count, move.start_col + d_col * frame / frame_count)
+        draw_board(screen)
+        draw_piece(screen, board)
+
+        color = colors[(move.end_row + move.end_col) % 2]
+        end_square = pygame.Rect(move.end_col * field_size, move.end_row * field_size, field_size, field_size)
+        pygame.draw.rect(screen, color, end_square)
+
+        # draw moving piece
+        screen.blit(img[move.piece_moved], pygame.Rect(col * field_size, row * field_size, field_size, field_size))
+        pygame.display.flip()
+        clock.tick(60)
 
 
 if __name__ == "__main__":
