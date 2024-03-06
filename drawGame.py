@@ -34,7 +34,6 @@ class GameState:
         self.queen = Queen(self)
         self.king = King(self)
         self.pawn = Pawn(self)
-
         self.all_moves = {"p": self.pawn.get_legal_moves, "R": self.rook.get_legal_moves,
                           "N": self.knight.get_legal_moves, "B": self.bishop.get_legal_moves,
                           "Q": self.queen.get_legal_moves, "K": self.king.get_legal_moves}
@@ -191,7 +190,10 @@ class GameState:
                             break
                     elif end_piece[0] == enemy_color:
                         enemy_type = end_piece[1]
-                        if (0 <= j <= 3 and enemy_type == "R") or (4 <= j <= 7 and enemy_type == "B") or (i == 1 and enemy_type == "p" and ((enemy_color == "w" and 6 <= j <= 7) or (enemy_color == "b" and 4 <= j <= 5))) or (enemy_type == "Q") or (i == 1 and enemy_type == "K"):
+                        if ((0 <= j <= 3 and enemy_type == "R") or (4 <= j <= 7 and enemy_type == "B") or
+                                (i == 1 and enemy_type == "p" and ((enemy_color == "w" and 6 <= j <= 7) or
+                                (enemy_color == "b" and 4 <= j <= 5))) or (enemy_type == "Q") or
+                                (i == 1 and enemy_type == "K")):
                             if possible_pin == ():
                                 in_check = True
                                 checks.append((end_row, end_col, direction[0], direction[1]))

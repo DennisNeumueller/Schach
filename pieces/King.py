@@ -29,3 +29,4 @@ class King():
                     else:
                         self.game_state.black_king_location = (row, col)
 
+

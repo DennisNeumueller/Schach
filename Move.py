@@ -1,5 +1,4 @@
 class Move:
-
     def __init__(self, start_square, end_square, board):
         self.start_row = start_square[0]
         self.start_col = start_square[1]

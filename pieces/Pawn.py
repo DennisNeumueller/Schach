@@ -43,7 +43,7 @@ class Pawn():
                             inside_range = range(king_col - 1, col, -1)
                             outside_range = range(col - 2, -1, -1)
                         for i in inside_range:
-                            if self.game_state.board[row][i] != "--":  # some piece beside en-passant pawn blocks
+                            if self.game_state.board[row][i] != "--":
                                 blocking_piece = True
                         for i in outside_range:
                             square = self.game_state.board[row][i]
@@ -53,7 +53,7 @@ class Pawn():
                                 blocking_piece = True
                     if not attacking_piece or blocking_piece:
                         moves.append(Move.Move((row, col), (row + move_amount, col - 1), self.game_state.board))
-        if col + 1 <= 7:
+        if col + 1 <= 7: #capture to the right
             if not piece_pinned or pin_direction == (move_amount, +1):
                 if self.game_state.board[row + move_amount][col + 1][0] == enemy_color:
                     moves.append(Move.Move((row, col), (row + move_amount, col + 1), self.game_state.board))
@@ -66,7 +66,7 @@ class Pawn():
                             inside_range = range(king_col - 1, col + 1, -1)
                             outside_range = range(col - 1, -1, -1)
                         for i in inside_range:
-                            if self.game_state.board[row][i] != "--":  # some piece beside en-passant pawn blocks
+                            if self.game_state.board[row][i] != "--":
                                 blocking_piece = True
                         for i in outside_range:
                             square = self.game_state.board[row][i]
