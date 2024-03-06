@@ -24,13 +24,13 @@ class Pawn():
             start_row = 1
             enemy_color = "w"
             king_row, king_col = self.game_state.black_king_location
-
-        if self.game_state.board[row + move_amount][col] == "--":  # 1 square pawn advance
-            if not piece_pinned or pin_direction == (move_amount, 0):
-                moves.append(Move.Move((row, col), (row + move_amount, col), self.game_state.board))
-                if row == start_row and self.game_state.board[row + 2 * move_amount][col] == "--":  # 2 square pawn advance
-                    moves.append(Move.Move((row, col), (row + 2 * move_amount, col), self.game_state.board))
-        if col - 1 >= 0:  # capture to the left
+        if 0 <= col - 1 <= 8 and 0 <= row + move_amount <= 8:
+            if self.game_state.board[row + move_amount][col] == "--":  # 1 square pawn advance
+                if not piece_pinned or pin_direction == (move_amount, 0):
+                    moves.append(Move.Move((row, col), (row + move_amount, col), self.game_state.board))
+                    if row == start_row and self.game_state.board[row + 2 * move_amount][col] == "--":  # 2 square pawn advance
+                        moves.append(Move.Move((row, col), (row + 2 * move_amount, col), self.game_state.board))
+        if col - 1 >= 0 and 0 <= row + move_amount < 8:  # capture to the left
             if not piece_pinned or pin_direction == (move_amount, -1):
                 if self.game_state.board[row + move_amount][col - 1][0] == enemy_color:
                     moves.append(Move.Move((row, col), (row + move_amount, col - 1), self.game_state.board))
@@ -53,8 +53,8 @@ class Pawn():
                                 blocking_piece = True
                     if not attacking_piece or blocking_piece:
                         moves.append(Move.Move((row, col), (row + move_amount, col - 1), self.game_state.board))
-        if col + 1 <= 7: #capture to the right
-            if not piece_pinned or pin_direction == (move_amount, +1):
+        if col + 1 <= 7 and 0 <= row + move_amount < 8: #capture to the right
+            if not piece_pinned or pin_direction == (move_amount, + 1):
                 if self.game_state.board[row + move_amount][col + 1][0] == enemy_color:
                     moves.append(Move.Move((row, col), (row + move_amount, col + 1), self.game_state.board))
                     attacking_piece = blocking_piece = False

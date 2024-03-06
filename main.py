@@ -162,7 +162,7 @@ def animate_move(move, screen, board, clock):
     d_col = move.end_col - move.start_col
     frames_per_square = 3  # frames to move one square
     frame_count = (abs(d_row) + abs(d_col)) * frames_per_square
-    for frame in range(frame_count + 1): #without the + 1, it seems to be a little laggy
+    for frame in range(frame_count + 1): #without the + 1, it seems
         row, col = (move.start_row + d_row * frame / frame_count, move.start_col + d_col * frame / frame_count)
         draw_board(screen)
         draw_piece(screen, board)
