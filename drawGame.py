@@ -101,14 +101,17 @@ class GameState:
         # castle move
         if move.can_castle:
             if move.end_col - move.start_col == 2:  # king-side castle move
-                self.board[move.end_row][move.end_col - 1] = self.board[move.end_row][move.end_col + 1]  # moves the rook to its new square
-                self.board[move.end_row][move.end_col + 1] = '--'  # erase old rook
-            else:  # queen-side castle move
-                self.board[move.end_row][move.end_col + 1] = self.board[move.end_row][move.end_col - 2]  # moves the rook to its new square
-                self.board[move.end_row][move.end_col - 2] = '--'  # erase old rook
-        self.updateCastleRights(move)
+                if move.end_col + 1 < len(self.board[0]):  # check if the index is within the valid range
+                    self.board[move.end_row][move.end_col - 1] = self.board[move.end_row][move.end_col + 1]  # moves the rook to its new square
+                    self.board[move.end_row][move.end_col + 1] = '--'  # erase old rook
+            elif move.end_col - move.start_col == -2:  # queen-side castle move
+                if move.end_col - 2 >= 0:  # check if the index is within the valid range
+                    self.board[move.end_row][move.end_col + 1] = self.board[move.end_row][move.end_col - 2]  # moves the rook to its new square
+                    self.board[move.end_row][move.end_col - 2] = '--'  # erase old rook
 
-    def updateCastleRights(self, move):
+        self.update_castle_rights(move)
+
+    def update_castle_rights(self, move):
         if move.piece_captured == "wR":
             if move.end_col == 0:  # left rook
                 self.current_castling_rights.wqs = False
@@ -207,6 +210,10 @@ class GameState:
 
                 if valid_square[0] == check_row and valid_square[1] == check_col:
                     break
+        for i in range(len(moves) - 1, -1, -1):
+            if moves[i].piece_moved[1] != "K":
+                if not (moves[i].end_row, moves[i].end_col) in valid_moves:
+                    moves.remove(moves[i])
 
         moves = [move for move in moves if move.piece_moved[1] == "K" or (move.end_row, move.end_col) in valid_moves]
         return moves
@@ -328,6 +335,7 @@ class GameState:
         return ((0 <= j <= 3 and enemy_type == "R") or (4 <= j <= 7 and enemy_type == "B") or
                 (i == 1 and enemy_type == "p" and ((enemy_color == "w" and 6 <= j <= 7) or
                 (enemy_color == "b" and 4 <= j <= 5))) or (enemy_type == "Q") or (i == 1 and enemy_type == "K"))
+
 
 class CastleRights:
     def __init__(self, wks, bks, wqs, bqs):
