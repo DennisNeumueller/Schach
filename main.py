@@ -139,13 +139,11 @@ def draw_board(screen):
 def draw_checkmate_message(screen, clock, custom_text=None):
     font = pygame.font.Font(None, 36)
     checkmate_text = font.render("Checkmate!", True, pygame.Color("red"))
-    screen.blit(checkmate_text, (
-    board_width // 2 - checkmate_text.get_width() // 2, board_height // 2 - checkmate_text.get_height() // 2))
+    screen.blit(checkmate_text, (board_width // 2 - checkmate_text.get_width() // 2, board_height // 2 - checkmate_text.get_height() // 2))
 
     if custom_text:
         custom_message = font.render(custom_text, True, pygame.Color("blue"))
-        screen.blit(custom_message, (
-        board_width // 2 - custom_message.get_width() // 2, board_height // 2 + checkmate_text.get_height()))
+        screen.blit(custom_message, (board_width // 2 - custom_message.get_width() // 2, board_height // 2 + checkmate_text.get_height()))
 
     pygame.display.flip()
     pygame.time.wait(3000)

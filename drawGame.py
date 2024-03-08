@@ -1,20 +1,13 @@
 import pygame
 
 from Move import Move
+from sound import Sound
 from pieces.Bishop import Bishop
 from pieces.King import King
 from pieces.Knight import Knight
 from pieces.Pawn import Pawn
 from pieces.Queen import Queen
 from pieces.Rook import Rook
-
-pygame.mixer.init()
-
-move_sound = pygame.mixer.Sound("sounds/move_sound.mp3")
-beat_sound = pygame.mixer.Sound("sounds/capture_sound.mp3")
-check_sound = pygame.mixer.Sound("sounds/check_sound.mp3")
-promote_sound = pygame.mixer.Sound("sounds/promote_sound.mp3")
-funny_sound = pygame.mixer.Sound("sounds/metal_pipe.mp3")
 
 
 class GameState:
@@ -41,6 +34,7 @@ class GameState:
                           "N": self.knight.get_legal_moves, "B": self.bishop.get_legal_moves,
                           "Q": self.queen.get_legal_moves, "K": self.king.get_legal_moves}
         self.current_castling_rights = CastleRights(True, True, True, True)
+        self.sound = Sound(self)
 
         #Game state variables
         self.white_to_move = True
@@ -54,36 +48,20 @@ class GameState:
         self.pins = []
         self.checks = []
 
-    #Methods for playing sounds
-    def play_move_sound(self):
-        move_sound.play()
-
-    def play_beat_sound(self):
-        beat_sound.play()
-
-    def play_check_sound(self):
-        check_sound.play()
-
-    def play_promote_sound(self):
-        promote_sound.play()
-
-    def play_sound(self):
-        funny_sound.play()
-
     # Making a move on the chess board
     def make_move(self, move):
 
         self.board[move.start_row][move.start_col] = "--"
 
         if self.board[move.end_row][move.end_col] != "--":
-            self.play_beat_sound()
+            self.sound.play_beat_sound()
 
         self.board[move.end_row][move.end_col] = move.piece_moved
         self.move_log.append(move)
         self.white_to_move = not self.white_to_move
 
         if self.board[move.start_row][move.start_col] == "--":
-            self.play_move_sound()
+            self.sound.play_move_sound()
 
         if move.piece_moved == "wK":
             self.white_king_location = (move.end_row, move.end_col)
@@ -92,11 +70,11 @@ class GameState:
             self.black_king_location = (move.end_row, move.end_col)
 
         if self.is_in_check():
-            self.play_check_sound()
+            self.sound.play_check_sound()
 
         if move.is_pawn_promotion:
             self.board[move.end_row][move.end_col] = move.piece_moved[0] + "Q"
-            self.play_promote_sound()
+            self.sound.play_promote_sound()
 
         # castle move
         if move.can_castle:
@@ -114,33 +92,33 @@ class GameState:
     def update_castle_rights(self, move):
         if move.piece_captured == "wR":
             if move.end_col == 0:  # left rook
-                self.current_castling_rights.wqs = False
+                self.current_castling_rights.white_queen_side = False
             elif move.end_col == 7:  # right rook
-                self.current_castling_rights.wks = False
+                self.current_castling_rights.white_king_side = False
         elif move.piece_captured == "bR":
             if move.end_col == 0:  # left rook
-                self.current_castling_rights.bqs = False
+                self.current_castling_rights.black_queen_side = False
             elif move.end_col == 7:  # right rook
-                self.current_castling_rights.bks = False
+                self.current_castling_rights.black_king_side = False
 
         if move.piece_moved == 'wK':
-            self.current_castling_rights.wqs = False
-            self.current_castling_rights.wks = False
+            self.current_castling_rights.white_queen_side = False
+            self.current_castling_rights.white_king_side = False
         elif move.piece_moved == 'bK':
-            self.current_castling_rights.bqs = False
-            self.current_castling_rights.bks = False
+            self.current_castling_rights.black_queen_side = False
+            self.current_castling_rights.black_king_side = False
         elif move.piece_moved == 'wR':
             if move.start_row == 7:
                 if move.start_col == 0:  # left rook
-                    self.current_castling_rights.wqs = False
+                    self.current_castling_rights.white_queen_side = False
                 elif move.start_col == 7:  # right rook
-                    self.current_castling_rights.wks = False
+                    self.current_castling_rights.black_king_side = False
         elif move.piece_moved == 'bR':
             if move.start_row == 0:
                 if move.start_col == 0:  # left rook
-                    self.current_castling_rights.bqs = False
+                    self.current_castling_rights.black_queen_side = False
                 elif move.start_col == 7:  # right rook
-                    self.current_castling_rights.bks = False
+                    self.current_castling_rights.black_king_side = False
 
     # Checking for the color of the opponent
     def check_enemy_color(self):
@@ -149,8 +127,10 @@ class GameState:
 
     # Getting all legal moves
     def get_legal_moves(self):
-        temp_castle_rights = CastleRights(self.current_castling_rights.wks, self.current_castling_rights.bks,
-                                          self.current_castling_rights.wqs, self.current_castling_rights.bqs)
+        temp_castle_rights = CastleRights(self.current_castling_rights.white_king_side,
+                                          self.current_castling_rights.black_king_side,
+                                          self.current_castling_rights.white_queen_side,
+                                          self.current_castling_rights.black_queen_side)
 
         moves = []
         self.in_check, self.pins, self.checks = self.check_for_pins()
@@ -173,26 +153,6 @@ class GameState:
         self.check_checkmate(moves)
         self.current_castling_rights = temp_castle_rights
         return moves
-
-    def get_castle_moves(self, row, col, moves):
-        if self.piece_under_attack(row, col):
-            return  # can't castle while in check
-        if (self.white_to_move and self.current_castling_rights.wks) or (
-                not self.white_to_move and self.current_castling_rights.bks):
-            self.get_king_side_castle(row, col, moves)
-        if (self.white_to_move and self.current_castling_rights.wqs) or (
-                not self.white_to_move and self.current_castling_rights.bqs):
-            self.get_queen_side_castle(row, col, moves)
-
-    def get_king_side_castle(self, row, col, moves):
-        if self.board[row][col + 1] == '--' and self.board[row][col + 2] == '--':
-            if not self.piece_under_attack(row, col + 1) and not self.piece_under_attack(row, col + 2):
-                moves.append(Move((row, col), (row, col + 2), self.board, can_castle=True))
-
-    def get_queen_side_castle(self, row, col, moves):
-        if self.board[row][col - 1] == '--' and self.board[row][col - 2] == '--' and self.board[row][col - 3] == '--':
-            if not self.piece_under_attack(row, col - 1) and not self.piece_under_attack(row, col - 2):
-                moves.append(Move((row, col), (row, col - 2), self.board, can_castle=True))
 
     # Filtering the moves if the king is in check
     def filter_moves_by_check(self, king_row, king_col):
@@ -236,9 +196,6 @@ class GameState:
 
         else:
             return self.piece_under_attack(self.black_king_location[0], self.black_king_location[1])
-
-    def get_beaten_pieces(self):
-        return self.beaten_pieces
 
     # Checking if the piece is under attack, so it can't move its position from the king
     def piece_under_attack(self, row, col):
@@ -336,10 +293,29 @@ class GameState:
                 (i == 1 and enemy_type == "p" and ((enemy_color == "w" and 6 <= j <= 7) or
                 (enemy_color == "b" and 4 <= j <= 5))) or (enemy_type == "Q") or (i == 1 and enemy_type == "K"))
 
+    def get_castle_moves(self, row, col, moves):
+        if self.piece_under_attack(row, col):
+            return  # can't castle while in check
+        if (self.white_to_move and self.current_castling_rights.white_king_side) or (
+                not self.white_to_move and self.current_castling_rights.black_king_side):
+            self.get_king_side_castle(row, col, moves)
+        if (self.white_to_move and self.current_castling_rights.white_queen_side) or (
+                not self.white_to_move and self.current_castling_rights.black_queen_side):
+            self.get_queen_side_castle(row, col, moves)
+
+    def get_king_side_castle(self, row, col, moves):
+        if self.board[row][col + 1] == '--' and self.board[row][col + 2] == '--':
+            if not self.piece_under_attack(row, col + 1) and not self.piece_under_attack(row, col + 2):
+                moves.append(Move((row, col), (row, col + 2), self.board, can_castle=True))
+
+    def get_queen_side_castle(self, row, col, moves):
+        if self.board[row][col - 1] == '--' and self.board[row][col - 2] == '--' and self.board[row][col - 3] == '--':
+            if not self.piece_under_attack(row, col - 1) and not self.piece_under_attack(row, col - 2):
+                moves.append(Move((row, col), (row, col - 2), self.board, can_castle=True))
 
 class CastleRights:
-    def __init__(self, wks, bks, wqs, bqs):
-        self.wks = wks
-        self.bks = bks
-        self.wqs = wqs
-        self.bqs = bqs
+    def __init__(self, white_king_side, black_king_side, white_queen_side, black_queen_side):
+        self.white_king_side = white_king_side
+        self.black_king_side = black_king_side
+        self.white_queen_side = white_queen_side
+        self.black_queen_side = black_queen_side

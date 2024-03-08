@@ -11,7 +11,8 @@ class Knight:
         ally_color = "w" if self.game_state.white_to_move else "b"
 
         for move in knight_moves:
-            end_row, end_col = row + move[0], col + move[1]
+            end_row = row + move[0]
+            end_col = col + move[1]
 
             if end_row <= 7 and end_col <= 7 and (not piece_pinned or self.is_pinned_on_direction(row, col, move)):
                 end_piece = self.game_state.board[end_row][end_col]
