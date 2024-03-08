@@ -9,6 +9,8 @@ class Sound():
     check_sound = pygame.mixer.Sound("sounds/check_sound.mp3")
     promote_sound = pygame.mixer.Sound("sounds/promote_sound.mp3")
     funny_sound = pygame.mixer.Sound("sounds/metal_pipe.mp3")
+    castle_sound = pygame.mixer.Sound("sounds/castle_sound.mp3")
+    game_end_sound = pygame.mixer.Sound("sounds/game_end.mp3")
 
     def __init__(self, game_state):
         self.game_state = game_state
@@ -28,3 +30,9 @@ class Sound():
 
     def play_sound(self):
         self.funny_sound.play()
+
+    def play_castle_sound(self):
+        self.castle_sound.play()
+
+    def play_game_end_sound(self):
+        self.game_end_sound.play()

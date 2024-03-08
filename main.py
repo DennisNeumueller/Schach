@@ -81,7 +81,7 @@ def run_game(clock, game_state, legal_moves, screen):
 
         if game_state.checkmate:  # looking for a checkmate
             game_over = True
-            draw_checkmate(screen, clock, game_state)
+            draw_checkmate(screen, game_state)
 
         elif game_state.stalemate:
             game_over = True
@@ -96,6 +96,7 @@ def run_game(clock, game_state, legal_moves, screen):
         counter = 0
         pygame.display.flip()
 
+
 # draw stalemate message
 def draw_stalemate_message(screen):
     font = pygame.font.Font(None, 36)
@@ -104,12 +105,13 @@ def draw_stalemate_message(screen):
     pygame.display.flip()
     pygame.time.wait(3000)
 
+
 # draw checkmate message
-def draw_checkmate(screen, clock, game_state):
+def draw_checkmate(screen,  game_state):
     if game_state.white_to_move:  # after detecting a checkmate and white has to move, it is a checkmate for black
-        draw_checkmate_message(screen, clock, custom_text="Black wins by checkmate!")
+        draw_checkmate_message(screen, custom_text="Black wins by checkmate!")
     else:
-        draw_checkmate_message(screen, clock, custom_text="White wins by checkmate!")
+        draw_checkmate_message(screen, custom_text="White wins by checkmate!")
 
 
 # draw the entire game
@@ -136,7 +138,7 @@ def draw_board(screen):
 
 
 # draw the checkmate message
-def draw_checkmate_message(screen, clock, custom_text=None):
+def draw_checkmate_message(screen, custom_text=None):
     font = pygame.font.Font(None, 36)
     checkmate_text = font.render("Checkmate!", True, pygame.Color("red"))
     screen.blit(checkmate_text, (board_width // 2 - checkmate_text.get_width() // 2, board_height // 2 - checkmate_text.get_height() // 2))
@@ -160,11 +162,9 @@ def draw_selected_piece(screen, selected_piece):
 def draw_legal_moves(screen, game_state, legal_moves, selected_piece):
     for move in legal_moves:
         if selected_piece == (move.start_row, move.start_col):
-            pygame.draw.rect(screen, pygame.Color("green"),
-                             (move.end_col * field_size, move.end_row * field_size, field_size, field_size), 3)
+            pygame.draw.rect(screen, pygame.Color("green"),(move.end_col * field_size, move.end_row * field_size, field_size, field_size), 3)
             if game_state.board[move.end_row][move.end_col] != "--":
-                pygame.draw.rect(screen, pygame.Color("red"),
-                                 (move.end_col * field_size, move.end_row * field_size, field_size, field_size), 3)
+                pygame.draw.rect(screen, pygame.Color("red"),(move.end_col * field_size, move.end_row * field_size, field_size, field_size), 3)
 
 
 # draw pieces
