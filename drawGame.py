@@ -260,7 +260,7 @@ class GameState:
                     elif end_piece[0] == enemy_color:
                         enemy_type = end_piece[1]
 
-                        if self.is_check_or_pin(i, j, enemy_type):  # Check if opponent can give check or pin
+                        if self.is_under_attack(i, j, enemy_type):  # Check if opponent can give check or pin
                             if possible_pin == ():  # No possible pin yet
                                 in_check = True  # If piece can give check, in_check = True
                                 checks.append((end_row, end_col, direction[0], direction[1]))
@@ -295,7 +295,7 @@ class GameState:
             return "b", "w", self.black_king_location[0], self.black_king_location[1]
 
     # Checks for a pin or a check from the enemy
-    def is_check_or_pin(self, i, j, enemy_type):
+    def is_under_attack(self, i, j, enemy_type):
         enemy_color = self.check_enemy_color()
         return ((0 <= j <= 3 and enemy_type == "R") or (4 <= j <= 7 and enemy_type == "B") or
                 (i == 1 and enemy_type == "p" and ((enemy_color == "w" and 6 <= j <= 7) or
